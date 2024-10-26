@@ -15,20 +15,11 @@ groups = {
       { command = 'cpu cpu3', max = 100 },
       { command = 'cpu cpu4', max = 100 },
       { command = 'cpu cpu5', max = 100 },
-      { command = 'cpu cpu6', max = 100 }
-    }
-  },
-
-
-  {
-    fg_color = 0x8aa236,
-    rings = 
-    {
-      { command = 'downspeedf ' .. config.network_ethernet, log = true, max = 12 },
-      { command = 'upspeedf ' .. config.network_ethernet, log = true, max = 12 }
+      { command = 'cpu cpu6', max = 100 },
+      { command = 'cpu cpu7', max = 100 },
+      { command = 'cpu cpu8', max = 100 }
     }
   }
-
 }
 
 require 'cairo'
@@ -57,25 +48,30 @@ function rgba(color, alpha)
 end
 
 
-function draw_line(cairo, y, breakpoint_count, fg_color)
+function draw_line(cairo, fromX, fromY, toX, toY, fg_color)
   cairo_set_line_width(cairo, 2)
   cairo_set_source_rgba(cairo, rgba(fg_color, config.fg_alpha))
-  cairo_move_to(cairo, 0, y - 1)
-  cairo_line_to(cairo, 337 - breakpoint_count * 2, y - 1)
+  cairo_move_to(cairo, fromX, fromY)
+  cairo_line_to(cairo, toX, toY)
   cairo_stroke(cairo)
 end
 
 
-function draw_ring(cairo, y, radius, breakpoints, max, fg_color)
+function draw_ring(cairo, x, y, radius, breakpoints, max, ringIndex)
   local previous_angle = angle(0, max)
-  cairo_set_source_rgba(cairo, rgba(fg_color, config.fg_alpha))
+  if (ringIndex % 2 == 0) then
+    ring_color = 0xa6a6a6
+  else
+    ring_color = 0xffffff
+  end
+  cairo_set_source_rgba(cairo, rgba(0xff0000, config.bg_alpha))
   for breakpoint_index in pairs(breakpoints) do
     local breakpoint_angle = angle(breakpoints[breakpoint_index], max)
     if breakpoint_angle > previous_angle then
       cairo_set_line_width(cairo, (#breakpoints - breakpoint_index) * 2 + 6)
-      cairo_arc(
+      cairo_arc(        -- draw usage as red
         cairo,
-        400,
+        x,
         y,
         radius + #breakpoints - breakpoint_index,
         previous_angle,
@@ -88,8 +84,8 @@ function draw_ring(cairo, y, radius, breakpoints, max, fg_color)
   breakpoint_angle = angle(max, max)
   if breakpoint_angle > previous_angle then
     cairo_set_line_width(cairo, 6)
-    cairo_set_source_rgba(cairo, rgba(config.bg_color, config.bg_alpha))
-    cairo_arc(cairo, 400, y, radius, previous_angle, breakpoint_angle)
+    cairo_set_source_rgba(cairo, rgba(ring_color, config.bg_alpha))
+    cairo_arc(cairo, x, y, radius, previous_angle, breakpoint_angle) -- draw rest of circle
     cairo_stroke(cairo)
   end
 end
@@ -106,6 +102,7 @@ function conky_rings()
     conky_window.width,
     conky_window.height
   ))
+  centerScreen = {math.floor( conky_window.width / 2 ), math.floor( conky_window.height / 2 )}
   for group_index in pairs(groups) do
     local group = groups[group_index]
     local y = group_index * 160 - 80
@@ -136,15 +133,20 @@ function conky_rings()
       if #breakpoints ~= 0 then
         draw_ring(
           cairo,
-          y,
-          68 - ring_index * 8,
+          centerScreen[1],
+          centerScreen[2] - 50,
+          168 - ring_index * 8,
           breakpoints,
           ring.max,
-          fg_color
+          ring_index
         )
       end
     end
-    draw_line(cairo, y, breakpoint_count, fg_color)
+      cairo_select_font_face (cairo, "Abaddon™", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_REGULAR);
+--      cairo_select_font_face (cairo, "Serif", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
+      cairo_set_source_rgba(cairo, rgba(0xffffff, config.bg_alpha))
+      cairo_set_font_size(cairo, 70)
+      cairo_move_to(cairo, centerScreen[1] - 70, centerScreen[2] - 25)
+      cairo_show_text(cairo, "CPU")
   end
-
 end
