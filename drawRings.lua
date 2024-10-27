@@ -29,13 +29,11 @@ function angle(position, max)
 end
 
 
-function evaluate(command, log)
+function evaluate(command)
   local value = conky_parse(string.format('${%s}', command)):gsub('%%', '')
   value = tonumber(value)
   if value == nil then
     return
-  elseif log then
-    return math.log(value + 1)
   else
     return value
   end
@@ -114,7 +112,7 @@ function conky_rings()
     for ring_index in pairs(group.rings) do
       local breakpoints = {}
       local ring = group.rings[ring_index]
-      local value = evaluate(ring.command, ring.log)
+      local value = evaluate(ring.command)
       if ring.breakpoints ~= nil then
         local position = 0
         for breakpoint_index in pairs(ring.breakpoints) do
@@ -134,7 +132,7 @@ function conky_rings()
         draw_ring(
           cairo,
           centerScreen[1],
-          centerScreen[2] - 50,
+          centerScreen[2] - 53,
           168 - ring_index * 8,
           breakpoints,
           ring.max,
@@ -142,11 +140,16 @@ function conky_rings()
         )
       end
     end
-      cairo_select_font_face (cairo, "Abaddon™", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_REGULAR);
---      cairo_select_font_face (cairo, "Serif", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
+--      cairo_select_font_face (cairo, "Abaddon™", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_REGULAR);
+      cairo_select_font_face (cairo, "Serif", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
       cairo_set_source_rgba(cairo, rgba(0xffffff, config.bg_alpha))
       cairo_set_font_size(cairo, 70)
       cairo_move_to(cairo, centerScreen[1] - 70, centerScreen[2] - 25)
       cairo_show_text(cairo, "CPU")
+
+      cairo_set_line_width (cairo, 2)
+      cairo_set_source_rgba(cairo, rgba(0xffffff, config.bg_alpha))
+      cairo_rectangle(cairo, 195, 220, 400, 200)
+      cairo_stroke(cairo)
   end
 end
