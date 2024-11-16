@@ -9,7 +9,7 @@ config = {
 groups = {
   {
     fg_color = 0xc56277,
-    rings = {
+    cpu_rings = {
       { command = 'cpu cpu1', max = 100 },
       { command = 'cpu cpu2', max = 100 },
       { command = 'cpu cpu3', max = 100 },
@@ -55,6 +55,16 @@ function draw_line(cairo, fromX, fromY, toX, toY, fg_color)
 end
 
 
+function draw_rectangle(cairo, color, x, y, w, h)
+  -- Paint a rectangle on screen
+  cairo_set_line_width (cairo, 2)
+  cairo_set_source_rgba(cairo, rgba(color, config.bg_alpha))
+  cairo_rectangle(cairo, x, y, w, h)
+  cairo_stroke(cairo)
+  return 1
+end
+
+
 function draw_ring(cairo, x, y, radius, breakpoints, max, ringIndex)
   local previous_angle = angle(0, max)
   if (ringIndex % 2 == 0) then
@@ -89,7 +99,7 @@ function draw_ring(cairo, x, y, radius, breakpoints, max, ringIndex)
 end
 
 
-function conky_rings()
+function conky_main()			-- MAIN FUNCTION. Called by conky.conf, as "rings", as "conky_" is automatically added
   if conky_window == nil then
     return
   end
@@ -109,9 +119,9 @@ function conky_rings()
     if config.fg_color_override ~= nil then
       fg_color = config.fg_color_override
     end
-    for ring_index in pairs(group.rings) do
+    for ring_index in pairs(group.cpu_rings) do
       local breakpoints = {}
-      local ring = group.rings[ring_index]
+      local ring = group.cpu_rings[ring_index]
       local value = evaluate(ring.command)
       if ring.breakpoints ~= nil then
         local position = 0
@@ -140,16 +150,16 @@ function conky_rings()
         )
       end
     end
---      cairo_select_font_face (cairo, "Abaddon™", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_REGULAR);
+    -- Write text at center of cpu rings
       cairo_select_font_face (cairo, "Serif", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
       cairo_set_source_rgba(cairo, rgba(0xffffff, config.bg_alpha))
-      cairo_set_font_size(cairo, 70)
-      cairo_move_to(cairo, centerScreen[1] - 70, centerScreen[2] - 25)
-      cairo_show_text(cairo, "CPU")
-
-      cairo_set_line_width (cairo, 2)
-      cairo_set_source_rgba(cairo, rgba(0xffffff, config.bg_alpha))
-      cairo_rectangle(cairo, 195, 220, 400, 200)
-      cairo_stroke(cairo)
+      cairo_set_font_size(cairo, 20)
+      cairo_move_to(cairo, centerScreen[1] - 200, centerScreen[2] - 30)
+      cairo_show_text(cairo, "AMD Ryzen 7 5800X 8-Core")
+   -- ${goto 540} ${execi 1000 grep model /proc/cpuinfo | cut -d : -f2 | tail -1 | sed 's/\s//' | sed "s/\bProcessor\b//g"}
   end
 end
+
+
+
+
