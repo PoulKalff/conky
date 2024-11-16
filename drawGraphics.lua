@@ -55,13 +55,12 @@ function draw_line(cairo, fromX, fromY, toX, toY, fg_color)
 end
 
 
-function draw_rectangle(cairo, color, x, y, w, h)
+function draw_rectangle(cairo, fromX, fromY, width, height, fg_color)
   -- Paint a rectangle on screen
   cairo_set_line_width (cairo, 2)
-  cairo_set_source_rgba(cairo, rgba(color, config.bg_alpha))
-  cairo_rectangle(cairo, x, y, w, h)
+  cairo_set_source_rgba(cairo, rgba(fg_color, config.bg_alpha))
+  cairo_rectangle(cairo, fromX, fromY, width, height)
   cairo_stroke(cairo)
-  return 1
 end
 
 
@@ -103,7 +102,7 @@ function conky_main()			-- MAIN FUNCTION. Called by conky.conf, as "rings", as "
   if conky_window == nil then
     return
   end
-  local cairo = cairo_create(cairo_xlib_surface_create(
+  cairo = cairo_create(cairo_xlib_surface_create(
     conky_window.display,
     conky_window.drawable,
     conky_window.visual,
@@ -111,6 +110,20 @@ function conky_main()			-- MAIN FUNCTION. Called by conky.conf, as "rings", as "
     conky_window.height
   ))
   centerScreen = {math.floor( conky_window.width / 2 ), math.floor( conky_window.height / 2 )}
+  -- cpu ring
+  draw_cpu()
+  -- ram ring
+
+  -- diskspace ring
+
+
+
+  -- infoBox border
+  draw_rectangle(cairo, 200, 200, 430, 280, 0xffffff)
+end
+
+
+function draw_cpu()
   for group_index in pairs(groups) do
     local group = groups[group_index]
     local y = group_index * 160 - 80
@@ -154,7 +167,7 @@ function conky_main()			-- MAIN FUNCTION. Called by conky.conf, as "rings", as "
       cairo_select_font_face (cairo, "Serif", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
       cairo_set_source_rgba(cairo, rgba(0xffffff, config.bg_alpha))
       cairo_set_font_size(cairo, 20)
-      cairo_move_to(cairo, centerScreen[1] - 200, centerScreen[2] - 30)
+      cairo_move_to(cairo, centerScreen[1] - 220, centerScreen[2] - 30)
       cairo_show_text(cairo, "AMD Ryzen 7 5800X 8-Core")
    -- ${goto 540} ${execi 1000 grep model /proc/cpuinfo | cut -d : -f2 | tail -1 | sed 's/\s//' | sed "s/\bProcessor\b//g"}
   end
