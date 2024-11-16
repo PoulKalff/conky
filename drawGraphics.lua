@@ -1,25 +1,19 @@
 config = {
   bg_color = 0xffffff,
   bg_alpha = 0.5,
-  fg_color_override = nil,
   fg_alpha = 0.8,
   network_ethernet = 'enp7s0'
 }
 
-groups = {
-  {
-    fg_color = 0xc56277,
-    cpu_rings = {
-      { command = 'cpu cpu1', max = 100 },
-      { command = 'cpu cpu2', max = 100 },
-      { command = 'cpu cpu3', max = 100 },
-      { command = 'cpu cpu4', max = 100 },
-      { command = 'cpu cpu5', max = 100 },
-      { command = 'cpu cpu6', max = 100 },
-      { command = 'cpu cpu7', max = 100 },
-      { command = 'cpu cpu8', max = 100 }
-    }
-  }
+cpu_rings = {
+  { command = 'cpu cpu1', max = 100 },
+  { command = 'cpu cpu2', max = 100 },
+  { command = 'cpu cpu3', max = 100 },
+  { command = 'cpu cpu4', max = 100 },
+  { command = 'cpu cpu5', max = 100 },
+  { command = 'cpu cpu6', max = 100 },
+  { command = 'cpu cpu7', max = 100 },
+  { command = 'cpu cpu8', max = 100 }
 }
 
 require 'cairo'
@@ -124,53 +118,30 @@ end
 
 
 function draw_cpu()
-  for group_index in pairs(groups) do
-    local group = groups[group_index]
-    local y = group_index * 160 - 80
-    local breakpoint_count = 0
-    local fg_color = group.fg_color
-    if config.fg_color_override ~= nil then
-      fg_color = config.fg_color_override
+  for ring_index in pairs(cpu_rings) do
+    local breakpoints = {}
+    local ring = cpu_rings[ring_index]
+    local value = evaluate(ring.command)
+    if value ~= nil then
+      table.insert(breakpoints, value)
     end
-    for ring_index in pairs(group.cpu_rings) do
-      local breakpoints = {}
-      local ring = group.cpu_rings[ring_index]
-      local value = evaluate(ring.command)
-      if ring.breakpoints ~= nil then
-        local position = 0
-        for breakpoint_index in pairs(ring.breakpoints) do
-          local value = evaluate(ring.breakpoints[breakpoint_index], ring.log)
-          if value == nil then
-            break
-          end
-          position = position + value
-          table.insert(breakpoints, position)
-        end
-      end
-      if value ~= nil then
-        table.insert(breakpoints, value)
-      end
-      breakpoint_count = math.max(breakpoint_count, #breakpoints)
-      if #breakpoints ~= 0 then
-        draw_ring(
-          cairo,
-          centerScreen[1],
-          centerScreen[2] - 53,
-          168 - ring_index * 8,
-          breakpoints,
-          ring.max,
-          ring_index
-        )
-      end
-    end
-    -- Write text at center of cpu rings
-      cairo_select_font_face (cairo, "Serif", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
-      cairo_set_source_rgba(cairo, rgba(0xffffff, config.bg_alpha))
-      cairo_set_font_size(cairo, 20)
-      cairo_move_to(cairo, centerScreen[1] - 220, centerScreen[2] - 30)
-      cairo_show_text(cairo, "AMD Ryzen 7 5800X 8-Core")
-   -- ${goto 540} ${execi 1000 grep model /proc/cpuinfo | cut -d : -f2 | tail -1 | sed 's/\s//' | sed "s/\bProcessor\b//g"}
+    draw_ring(
+      cairo,
+      centerScreen[1],
+      centerScreen[2] - 53,
+      168 - ring_index * 8,
+      breakpoints,
+      ring.max,
+      ring_index
+    )
   end
+  -- Write text at center of cpu rings
+    cairo_select_font_face (cairo, "Serif", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
+    cairo_set_source_rgba(cairo, rgba(0xffffff, config.bg_alpha))
+    cairo_set_font_size(cairo, 20)
+    cairo_move_to(cairo, centerScreen[1] - 220, centerScreen[2] - 30)
+    cairo_show_text(cairo, "AMD Ryzen 7 5800X 8-Core")
+ -- ${goto 540} ${execi 1000 grep model /proc/cpuinfo | cut -d : -f2 | tail -1 | sed 's/\s//' | sed "s/\bProcessor\b//g"}
 end
 
 
