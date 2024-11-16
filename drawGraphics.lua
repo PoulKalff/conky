@@ -6,6 +6,11 @@ config = {
   network_ethernet = 'enp7s0'
 }
 
+disks_rings = {
+  { command = 'mem',  max = 'memmax' },
+  { command = 'swap', max = 'swapmax' }
+}
+
 ram_rings = {
   { command = 'mem',  max = 'memmax' },
   { command = 'swap', max = 'swapmax' }
@@ -73,7 +78,6 @@ end
 
 
 function draw_rectangle(cairo, fromX, fromY, width, height, fg_color)
-  -- Paint a rectangle on screen
   cairo_set_line_width (cairo, 2)
   cairo_set_source_rgba(cairo, rgba(fg_color, config.bg_alpha))
   cairo_rectangle(cairo, fromX, fromY, width, height)
@@ -126,16 +130,19 @@ function conky_main()			-- MAIN FUNCTION. Called by conky.conf, as "rings", sinc
     conky_window.width,
     conky_window.height
   ))
-  xCenter = math.floor( conky_window.width / 2 )
+  xCenter = math.floor( (conky_window.width / 2) - 20 )
   yCenter = math.floor( conky_window.height / 2 )
+  -- helper lines
+  draw_line(cairo, 0, 0, 1717, 1082, 0xffffff)
+  draw_line(cairo, 0, 982, 1567, 0, 0xffffff)
   -- ram ring
-  draw_ram(1200, 400)
+  draw_ram(1160, 310)
   -- cpu ring
   draw_cpu(xCenter, yCenter)
   -- diskspace ring
   draw_disk(400, 800)
   -- infoBox border
-  draw_rectangle(cairo, 200, 200, 430, 280, 0xffffff)
+  draw_rectangle(cairo, 200, 105, 430, 280, 0xffffff)
 end
 
 
