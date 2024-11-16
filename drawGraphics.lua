@@ -1,8 +1,6 @@
 
 config = {
-  bg_color = 0xffffff,
   bg_alpha = 0.5,
-  fg_alpha = 0.8,
   network_ethernet = 'enp7s0'
 }
 
@@ -70,7 +68,7 @@ end
 
 function draw_line(cairo, fromX, fromY, toX, toY, fg_color)
   cairo_set_line_width(cairo, 2)
-  cairo_set_source_rgba(cairo, rgba(fg_color, config.fg_alpha))
+  cairo_set_source_rgba(cairo, rgba(fg_color, config.bg_alpha))
   cairo_move_to(cairo, fromX, fromY)
   cairo_line_to(cairo, toX, toY)
   cairo_stroke(cairo)
@@ -133,8 +131,8 @@ function conky_main()			-- MAIN FUNCTION. Called by conky.conf, as "rings", sinc
   xCenter = math.floor( (conky_window.width / 2) - 20 )
   yCenter = math.floor( conky_window.height / 2 )
   -- helper lines
-  draw_line(cairo, 0, 0, 1717, 1082, 0xffffff)
-  draw_line(cairo, 0, 982, 1567, 0, 0xffffff)
+--  draw_line(cairo, 0, 0, 1717, 1082, 0xffffff)
+--  draw_line(cairo, 0, 982, 1567, 0, 0xffffff)
   -- ram ring
   draw_ram(1160, 310)
   -- cpu ring
