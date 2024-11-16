@@ -1,8 +1,14 @@
+
 config = {
   bg_color = 0xffffff,
   bg_alpha = 0.5,
   fg_alpha = 0.8,
   network_ethernet = 'enp7s0'
+}
+
+ram_rings = {
+  { command = 'mem',  max = 'memmax' },
+  { command = 'swap', max = 'swapmax' }
 }
 
 cpu_rings = {
@@ -20,6 +26,23 @@ require 'cairo'
 
 function angle(position, max)
   return position / max * math.pi * 1.5 - math.pi
+end
+
+
+function toPercentage(command)
+  local raw = conky_parse(string.format('${%s}', command))
+  local category = string.sub(raw, -3)
+  local value = string.sub(raw, 0, -4)
+  if category == "GiB" then
+    value = tonumber(value * 1000)
+  else
+    value = tonumber(value)
+  end
+  if value == nil then
+    return
+  else
+    return value
+  end
 end
 
 
@@ -58,7 +81,7 @@ function draw_rectangle(cairo, fromX, fromY, width, height, fg_color)
 end
 
 
-function draw_ring(cairo, x, y, radius, breakpoints, max, ringIndex)
+function draw_ring(cairo, x, y, radius, breakpoints, max, ringIndex, ring_width)
   local previous_angle = angle(0, max)
   if (ringIndex % 2 == 0) then
     ring_color = 0xa6a6a6
@@ -69,7 +92,7 @@ function draw_ring(cairo, x, y, radius, breakpoints, max, ringIndex)
   for breakpoint_index in pairs(breakpoints) do
     local breakpoint_angle = angle(breakpoints[breakpoint_index], max)
     if breakpoint_angle > previous_angle then
-      cairo_set_line_width(cairo, (#breakpoints - breakpoint_index) * 2 + 6)
+      cairo_set_line_width(cairo, (#breakpoints - breakpoint_index) * 2 + ring_width)
       cairo_arc(        -- draw usage as red
         cairo,
         x,
@@ -84,7 +107,7 @@ function draw_ring(cairo, x, y, radius, breakpoints, max, ringIndex)
   end
   breakpoint_angle = angle(max, max)
   if breakpoint_angle > previous_angle then
-    cairo_set_line_width(cairo, 6)
+    cairo_set_line_width(cairo, ring_width)
     cairo_set_source_rgba(cairo, rgba(ring_color, config.bg_alpha))
     cairo_arc(cairo, x, y, radius, previous_angle, breakpoint_angle) -- draw rest of circle
     cairo_stroke(cairo)
@@ -92,7 +115,7 @@ function draw_ring(cairo, x, y, radius, breakpoints, max, ringIndex)
 end
 
 
-function conky_main()			-- MAIN FUNCTION. Called by conky.conf, as "rings", as "conky_" is automatically added
+function conky_main()			-- MAIN FUNCTION. Called by conky.conf, as "rings", since "conky_" is automatically added
   if conky_window == nil then
     return
   end
@@ -103,21 +126,60 @@ function conky_main()			-- MAIN FUNCTION. Called by conky.conf, as "rings", as "
     conky_window.width,
     conky_window.height
   ))
-  centerScreen = {math.floor( conky_window.width / 2 ), math.floor( conky_window.height / 2 )}
-  -- cpu ring
-  draw_cpu()
+  xCenter = math.floor( conky_window.width / 2 )
+  yCenter = math.floor( conky_window.height / 2 )
   -- ram ring
-
+  draw_ram(1200, 400)
+  -- cpu ring
+  draw_cpu(xCenter, yCenter)
   -- diskspace ring
-
-
-
+  draw_disk(400, 800)
   -- infoBox border
   draw_rectangle(cairo, 200, 200, 430, 280, 0xffffff)
 end
 
 
-function draw_cpu()
+function draw_disk(x, y)
+  displayTexts = {}
+end
+
+
+function draw_ram(x, y)
+  displayTexts = {}
+  for ring_index in pairs(ram_rings) do
+    local breakpoints = {}
+    local ring = ram_rings[ring_index]
+    local value = toPercentage(ring.command)
+    local max = toPercentage(ring.max)
+    txt = conky_parse(string.format('${%s}', ring.command)) .. " / " ..  conky_parse(string.format('${%s}', ring.max))
+    table.insert(displayTexts, txt)
+    if value ~= nil then
+      table.insert(breakpoints, value)
+    end
+    draw_ring(
+      cairo,
+      x,
+      y - 53,
+      100 - ring_index * 18,
+      breakpoints,
+      max,
+      ring_index, 
+      16
+    )
+  end
+  -- Write text at center of rings
+  cairo_select_font_face (cairo, "Serif", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
+  cairo_set_font_size(cairo, 14)
+  cairo_set_source_rgba(cairo, rgba(0xffffff, config.bg_alpha))
+  cairo_move_to(cairo, x - 140, y - 38)
+  cairo_show_text(cairo, "RAM " .. displayTexts[1])
+  cairo_set_source_rgba(cairo, rgba(0xa6a6a6, config.bg_alpha))
+  cairo_move_to(cairo, x - 140, y - 23)
+  cairo_show_text(cairo, "SWAP " .. displayTexts[2])
+end
+
+
+function draw_cpu(x, y)
   for ring_index in pairs(cpu_rings) do
     local breakpoints = {}
     local ring = cpu_rings[ring_index]
@@ -127,20 +189,21 @@ function draw_cpu()
     end
     draw_ring(
       cairo,
-      centerScreen[1],
-      centerScreen[2] - 53,
+      x,
+      y - 53,
       168 - ring_index * 8,
       breakpoints,
       ring.max,
-      ring_index
+      ring_index,
+      6
     )
   end
-  -- Write text at center of cpu rings
-    cairo_select_font_face (cairo, "Serif", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
-    cairo_set_source_rgba(cairo, rgba(0xffffff, config.bg_alpha))
-    cairo_set_font_size(cairo, 20)
-    cairo_move_to(cairo, centerScreen[1] - 220, centerScreen[2] - 30)
-    cairo_show_text(cairo, "AMD Ryzen 7 5800X 8-Core")
+  -- Write text at center of rings
+  cairo_select_font_face (cairo, "Serif", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
+  cairo_set_source_rgba(cairo, rgba(0xffffff, config.bg_alpha))
+  cairo_set_font_size(cairo, 20)
+  cairo_move_to(cairo, x - 220, y - 30)
+  cairo_show_text(cairo, "AMD Ryzen 7 5800X 8-Core")
  -- ${goto 540} ${execi 1000 grep model /proc/cpuinfo | cut -d : -f2 | tail -1 | sed 's/\s//' | sed "s/\bProcessor\b//g"}
 end
 
