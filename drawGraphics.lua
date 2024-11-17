@@ -133,12 +133,14 @@ function conky_main()			-- MAIN FUNCTION. Called by conky.conf, as "rings", sinc
   -- helper lines
 --  draw_line(cairo, 0, 0, 1717, 1082, 0xffffff)
 --  draw_line(cairo, 0, 982, 1567, 0, 0xffffff)
-  -- ram ring
-  draw_ram(1160, 310)
-  -- cpu ring
   draw_cpu(xCenter, yCenter)
-  -- diskspace ring
+  draw_ram(1160, 310)
+
+
   draw_disk(400, 800)
+
+
+
   -- infoBox border
   draw_rectangle(cairo, 200, 105, 430, 280, 0xffffff)
 end
@@ -181,6 +183,7 @@ function draw_ram(x, y)
   cairo_set_source_rgba(cairo, rgba(0xa6a6a6, config.bg_alpha))
   cairo_move_to(cairo, x - 140, y - 23)
   cairo_show_text(cairo, "SWAP " .. displayTexts[2])
+  cairo_stroke(cairo)
 end
 
 
@@ -209,6 +212,7 @@ function draw_cpu(x, y)
   cairo_set_font_size(cairo, 20)
   cairo_move_to(cairo, x - 220, y - 30)
   cairo_show_text(cairo, "AMD Ryzen 7 5800X 8-Core")
+  cairo_stroke(cairo)
  -- ${goto 540} ${execi 1000 grep model /proc/cpuinfo | cut -d : -f2 | tail -1 | sed 's/\s//' | sed "s/\bProcessor\b//g"}
 end
 
