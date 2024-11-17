@@ -1,6 +1,6 @@
 
 config = {
-  bg_alpha = 0.5,
+  bg_alpha = 0.6,
   network_ethernet = 'enp7s0'
 }
 
@@ -88,14 +88,14 @@ function draw_rectangle(cairo, fromX, fromY, width, height, fg_color)
 end
 
 
-function draw_ring(cairo, x, y, radius, breakpoints, max, ringIndex, ring_width)
+function draw_ring(cairo, x, y, radius, breakpoints, max, ringIndex, ring_width, color)
   local previous_angle = angle(0, max)
   if (ringIndex % 2 == 0) then
     ring_color = 0xa6a6a6
   else
     ring_color = 0xffffff
   end
-  cairo_set_source_rgba(cairo, rgba(0xaa0000, config.bg_alpha))
+  cairo_set_source_rgba(cairo, rgba(color, config.bg_alpha))
   for breakpoint_index in pairs(breakpoints) do
     local breakpoint_angle = angle(breakpoints[breakpoint_index], max)
     if breakpoint_angle > previous_angle then
@@ -135,14 +135,9 @@ function conky_main()			-- MAIN FUNCTION. Called by conky.conf, as "rings", sinc
   ))
   xCenter = math.floor( (conky_window.width / 2) - 20 )
   yCenter = math.floor( conky_window.height / 2 )
---  diagonal helper lines
---  draw_line(cairo, 0, 0, 1717, 1082, 0xffffff)
---  draw_line(cairo, 0, 982, 1567, 0, 0xffffff)
   draw_cpu(xCenter, yCenter)
   draw_ram(xCenter - 400, yCenter)
   draw_disk(xCenter + 400, yCenter)
-  -- infoBox border
---  draw_rectangle(cairo, 200, 105, 430, 280, 0xffffff)
 end
 
 
@@ -168,16 +163,21 @@ function draw_disk(x, y)
       breakpoints,
       max,
       ring_index, 
-      10
+      10,
+      0x0000aa
     )
   end
   -- Write text at center of rings
   cairo_select_font_face (cairo, "Serif", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
+  cairo_set_source_rgba(cairo, rgba(0xffffff, config.bg_alpha))
+  cairo_set_font_size(cairo, 40)
+  cairo_move_to(cairo, x - 50, y - 65)
+  cairo_show_text(cairo, "DISK")
   cairo_set_font_size(cairo, 12)
   for _index in pairs(positions) do
     local yPos = positions[_index]
     if (_index % 2 == 0) then
-      cairo_set_source_rgba(cairo, rgba(0xa6a6a6, config.bg_alpha))
+      cairo_set_source_rgba(cairo, rgba(0xc6c6c6, config.bg_alpha))
     else
       cairo_set_source_rgba(cairo, rgba(0xffffff, config.bg_alpha))
     end
@@ -210,16 +210,20 @@ function draw_ram(x, y)
       breakpoints,
       max,
       ring_index, 
-      16
+      16,
+      0x00aa00
     )
   end
   -- Write text at center of rings
   cairo_select_font_face (cairo, "Serif", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
-  cairo_set_font_size(cairo, 14)
   cairo_set_source_rgba(cairo, rgba(0xffffff, config.bg_alpha))
+  cairo_set_font_size(cairo, 30)
+  cairo_move_to(cairo, x - 35, y - 65)
+  cairo_show_text(cairo, "RAM")
+  cairo_set_font_size(cairo, 14)
   cairo_move_to(cairo, x - 140, y - 38)
   cairo_show_text(cairo, "RAM " .. displayTexts[1])
-  cairo_set_source_rgba(cairo, rgba(0xa6a6a6, config.bg_alpha))
+  cairo_set_source_rgba(cairo, rgba(0xc6c6c6, config.bg_alpha))
   cairo_move_to(cairo, x - 140, y - 23)
   cairo_show_text(cairo, "SWAP " .. displayTexts[2])
   cairo_stroke(cairo)
@@ -242,12 +246,16 @@ function draw_cpu(x, y)
       breakpoints,
       ring.max,
       ring_index,
-      8
+      8,
+      0xaa0000
     )
   end
   -- Write text at center of rings
   cairo_select_font_face (cairo, "Serif", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
   cairo_set_source_rgba(cairo, rgba(0xffffff, config.bg_alpha))
+  cairo_set_font_size(cairo, 50)
+  cairo_move_to(cairo, x - 50, y - 70)
+  cairo_show_text(cairo, "CPU")
   cairo_set_font_size(cairo, 20)
   cairo_move_to(cairo, x - 220, y - 30)
   cairo_show_text(cairo, "AMD Ryzen 7 5800X 8-Core")
