@@ -143,7 +143,7 @@ end
 
 function draw_disk(x, y)
   local displayTexts = {}
-  local positions = {y - 40, y - 28, y - 16, y - 4, y + 8}
+  local positions = {y - 40, y - 25, y - 10, y + 5, y + 20}
   for ring_index in pairs(disk_rings) do
     local breakpoints = {}
     local ring = disk_rings[ring_index]
@@ -162,7 +162,7 @@ function draw_disk(x, y)
       140 - ring_index * 12,
       breakpoints,
       max,
-      ring_index, 
+      ring_index,
       10,
       0x0000aa
     )
@@ -173,7 +173,7 @@ function draw_disk(x, y)
   cairo_set_font_size(cairo, 40)
   cairo_move_to(cairo, x - 50, y - 65)
   cairo_show_text(cairo, "DISK")
-  cairo_set_font_size(cairo, 12)
+  cairo_set_font_size(cairo, 16)
   for _index in pairs(positions) do
     local yPos = positions[_index]
     if (_index % 2 == 0) then
@@ -181,9 +181,9 @@ function draw_disk(x, y)
     else
       cairo_set_source_rgba(cairo, rgba(0xffffff, config.bg_alpha))
     end
-    cairo_move_to(cairo, x - 162, yPos)
+    cairo_move_to(cairo, x - 175, yPos)
     cairo_show_text(cairo, displayTexts[_index][1])
-    cairo_move_to(cairo, x - 30, yPos)
+    cairo_move_to(cairo, x - 60, yPos)
     cairo_show_text(cairo, displayTexts[_index][2])
   end
   cairo_stroke(cairo)
