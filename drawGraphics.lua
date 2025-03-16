@@ -31,7 +31,11 @@ cpu_rings = {
 require 'cairo'
 
 function angle(position, max)
-  return position / max * math.pi * 1.5 - math.pi
+  if max == nil then
+    return 0
+  else
+    return position / max * math.pi * 1.5 - math.pi
+  end
 end
 
 
@@ -121,29 +125,30 @@ function draw_ring(cairo, x, y, radius, breakpoints, max, ringIndex, ring_width,
   end
 end
 
-
-function conky_main()			-- MAIN FUNCTION. Called by conky.conf, as "rings", since "conky_" is automatically added
+function conky_main()                   -- MAIN FUNCTION. Called by conky.conf, as "rings", since "conky_" is automatically added
   if conky_window == nil then
     return
   end
-  cairo = cairo_create(cairo_xlib_surface_create(
-    conky_window.display,
-    conky_window.drawable,
-    conky_window.visual,
-    conky_window.width,
-    conky_window.height
-  ))
-  xCenter = math.floor( (conky_window.width / 2) - 20 )
-  yCenter = math.floor( conky_window.height / 2 )
+  cairo = cairo_create(
+    cairo_xlib_surface_create(
+      conky_window.display,
+      conky_window.drawable,
+      conky_window.visual,
+      1100,
+      700
+    )
+  )
+  xCenter = math.floor( conky_window.width / 2)
+  yCenter = math.floor( conky_window.height / 2 ) + 30  -- 30 pixels offset from top
   draw_cpu(xCenter, yCenter)
   draw_ram(xCenter - 400, yCenter)
   draw_disk(xCenter + 400, yCenter)
+--  draw_rectangle(cairo, 0, 0, 1100, 700, 0x0000ff) -- rect (blue) to show LUA area
 end
-
 
 function draw_disk(x, y)
   local displayTexts = {}
-  local positions = {y - 40, y - 25, y - 10, y + 5, y + 20}
+  local positions = {y - 37, y - 22, y - 7, y + 8, y + 23}
   for ring_index in pairs(disk_rings) do
     local breakpoints = {}
     local ring = disk_rings[ring_index]
@@ -181,9 +186,9 @@ function draw_disk(x, y)
     else
       cairo_set_source_rgba(cairo, rgba(0xffffff, config.bg_alpha))
     end
-    cairo_move_to(cairo, x - 175, yPos)
+    cairo_move_to(cairo, x - 180, yPos)
     cairo_show_text(cairo, displayTexts[_index][1])
-    cairo_move_to(cairo, x - 60, yPos)
+    cairo_move_to(cairo, x - 70, yPos)
     cairo_show_text(cairo, displayTexts[_index][2])
   end
   cairo_stroke(cairo)
@@ -261,9 +266,6 @@ function draw_cpu(x, y)
   cairo_show_text(cairo, "AMD Ryzen 7 5800X 8-Core")
   cairo_stroke(cairo)
  -- ${goto 540} ${execi 1000 grep model /proc/cpuinfo | cut -d : -f2 | tail -1 | sed 's/\s//' | sed "s/\bProcessor\b//g"}
-
-  draw_rectangle(cairo, 240, 100, 1100, 730, 0xffffff)     -- for test
-
 end
 
 
