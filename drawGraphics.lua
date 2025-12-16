@@ -29,6 +29,7 @@ cpu_rings = {
 }
 
 require 'cairo'
+require 'cairo_xlib'
 
 function angle(position, max)
   if max == nil then

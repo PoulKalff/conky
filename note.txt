@@ -1,0 +1,23 @@
+TODO:
+--------------------
+Try to get variables that do not change in INIT.section, instead of querying them continously
+
+
+
+
+
+
+
+
+
+
+
+
+In lua, get variables from conky:
+-------------------------------------------
+cpu_percent = tonumber(conky_parse("${cpu}")) -- Fetch CPU usage as a number
+
+
+conky_parse() :			conky_parse("${cpu}") → "25.5"
+
+conky_get_info() :		cores = conky.get_info().cpus
