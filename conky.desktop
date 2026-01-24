@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+#Exec=/usr/bin/conky
+Exec=bash -c "sleep 30s && /usr/bin/conky"
+Hidden=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true
+#X-GNOME-Autostart-Delay=20
+Name[en_US]=Conky
+Name=Conky
+Comment[en_US]=
+Comment=
