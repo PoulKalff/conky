@@ -7,6 +7,7 @@ config = {
 disk_rings = {
   { command = 'fs_used /',  max = 'fs_size /' },
   { command = 'fs_used /home',  max = 'fs_size /home' },
+  { command = 'fs_used /mnt/data',  max = 'fs_size /mnt/data' },
   { command = 'fs_used /mnt/3tb_hdd',  max = 'fs_size /mnt/3tb_hdd' },
   { command = 'fs_used /mnt/8tb_hdd',  max = 'fs_size /mnt/8tb_hdd' }
 }

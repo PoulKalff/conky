@@ -1,0 +1,19 @@
+Install program:
+-------------------------------------------
+sudo apt install conky
+
+
+
+Copy config files:
+-------------------------------------------
+cp drawGraphics.lua /etc/conky/
+cp conky.conf /etc/conky/
+(Copy from hostname folder... if there are updated.... should aim for single files, not host specific ones)
+
+
+
+Enable autostart:
+-------------------------------------------
+cp conky.desktop  ~/.config/autostart/
+
+
