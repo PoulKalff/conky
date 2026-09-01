@@ -1,17 +1,3 @@
-TODO:
---------------------
-Try to get variables that do not change in INIT.section, instead of querying them continously
-
-
-
-
-
-
-
-
-
-
-
 
 In lua, get variables from conky:
 -------------------------------------------

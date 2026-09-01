@@ -1,32 +1,4 @@
-
-config = {
-  bg_alpha = 0.6,
-  network_ethernet = 'enp7s0'
-}
-
-disk_rings = {
-  { command = 'fs_used /',  max = 'fs_size /' },
-  { command = 'fs_used /home',  max = 'fs_size /home' },
-  { command = 'fs_used /mnt/3tb_hdd',  max = 'fs_size /mnt/3tb_hdd' },
-  { command = 'fs_used /mnt/8tb_hdd',  max = 'fs_size /mnt/8tb_hdd' }
-}
-
-ram_rings = {
-  { command = 'mem',  max = 'memmax' },
-  { command = 'swap', max = 'swapmax' }
-}
-
-cpu_rings = {
-  { command = 'cpu cpu1', max = 100 },
-  { command = 'cpu cpu2', max = 100 },
-  { command = 'cpu cpu3', max = 100 },
-  { command = 'cpu cpu4', max = 100 },
-  { command = 'cpu cpu5', max = 100 },
-  { command = 'cpu cpu6', max = 100 },
-  { command = 'cpu cpu7', max = 100 },
-  { command = 'cpu cpu8', max = 100 }
-}
-
+require 'variables'
 require 'cairo'
 require 'cairo_xlib'
 
@@ -77,7 +49,7 @@ end
 
 function draw_line(cairo, fromX, fromY, toX, toY, fg_color)
   cairo_set_line_width(cairo, 2)
-  cairo_set_source_rgba(cairo, rgba(fg_color, config.bg_alpha))
+  cairo_set_source_rgba(cairo, rgba(fg_color, variables.bg_alpha))
   cairo_move_to(cairo, fromX, fromY)
   cairo_line_to(cairo, toX, toY)
   cairo_stroke(cairo)
@@ -86,7 +58,7 @@ end
 
 function draw_rectangle(cairo, fromX, fromY, width, height, fg_color)
   cairo_set_line_width (cairo, 2)
-  cairo_set_source_rgba(cairo, rgba(fg_color, config.bg_alpha))
+  cairo_set_source_rgba(cairo, rgba(fg_color, variables.bg_alpha))
   cairo_rectangle(cairo, fromX, fromY, width, height)
   cairo_stroke(cairo)
 end
@@ -99,7 +71,7 @@ function draw_ring(cairo, x, y, radius, breakpoints, max, ringIndex, ring_width,
   else
     ring_color = 0xffffff
   end
-  cairo_set_source_rgba(cairo, rgba(color, config.bg_alpha))
+  cairo_set_source_rgba(cairo, rgba(color, variables.bg_alpha))
   for breakpoint_index in pairs(breakpoints) do
     local breakpoint_angle = angle(breakpoints[breakpoint_index], max)
     if breakpoint_angle > previous_angle then
@@ -119,7 +91,7 @@ function draw_ring(cairo, x, y, radius, breakpoints, max, ringIndex, ring_width,
   breakpoint_angle = angle(max, max)
   if breakpoint_angle > previous_angle then
     cairo_set_line_width(cairo, ring_width)
-    cairo_set_source_rgba(cairo, rgba(ring_color, config.bg_alpha))
+    cairo_set_source_rgba(cairo, rgba(ring_color, variables.bg_alpha))
     cairo_arc(cairo, x, y, radius, previous_angle, breakpoint_angle) -- draw rest of circle
     cairo_stroke(cairo)
   end
@@ -149,9 +121,9 @@ end
 function draw_disk(x, y)
   local displayTexts = {}
   local positions = {y - 37, y - 22, y - 7, y + 8} --, y + 23} 										Calculate this!!!!
-  for ring_index in pairs(disk_rings) do
+  for ring_index in pairs(variables.disk_rings) do
     local breakpoints = {}
-    local ring = disk_rings[ring_index]
+    local ring = variables.disk_rings[ring_index]
     local value = toPercentage(ring.command)
     local max = toPercentage(ring.max)
     local str1 = string.sub(ring.command, 9)
@@ -174,7 +146,7 @@ function draw_disk(x, y)
   end
   -- Write text at center of rings
   cairo_select_font_face (cairo, "Serif", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
-  cairo_set_source_rgba(cairo, rgba(0xffffff, config.bg_alpha))
+  cairo_set_source_rgba(cairo, rgba(0xffffff, variables.bg_alpha))
   cairo_set_font_size(cairo, 40)
   cairo_move_to(cairo, x - 50, y - 65)
   cairo_show_text(cairo, "DISK")
@@ -182,9 +154,9 @@ function draw_disk(x, y)
   for _index in pairs(positions) do
     local yPos = positions[_index]
     if (_index % 2 == 0) then
-      cairo_set_source_rgba(cairo, rgba(0xc6c6c6, config.bg_alpha))
+      cairo_set_source_rgba(cairo, rgba(0xc6c6c6, variables.bg_alpha))
     else
-      cairo_set_source_rgba(cairo, rgba(0xffffff, config.bg_alpha))
+      cairo_set_source_rgba(cairo, rgba(0xffffff, variables.bg_alpha))
     end
     cairo_move_to(cairo, x - 180, yPos)
     cairo_show_text(cairo, displayTexts[_index][1])
@@ -197,9 +169,9 @@ end
 
 function draw_ram(x, y)
   local displayTexts = {}
-  for ring_index in pairs(ram_rings) do
+  for ring_index in pairs(variables.ram_rings) do
     local breakpoints = {}
-    local ring = ram_rings[ring_index]
+    local ring = variables.ram_rings[ring_index]
     local value = toPercentage(ring.command)
     local max = toPercentage(ring.max)
     txt = conky_parse(string.format('${%s}', ring.command)) .. " / " ..  conky_parse(string.format('${%s}', ring.max))
@@ -221,14 +193,14 @@ function draw_ram(x, y)
   end
   -- Write text at center of rings
   cairo_select_font_face (cairo, "Serif", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
-  cairo_set_source_rgba(cairo, rgba(0xffffff, config.bg_alpha))
+  cairo_set_source_rgba(cairo, rgba(0xffffff, variables.bg_alpha))
   cairo_set_font_size(cairo, 30)
   cairo_move_to(cairo, x - 40, y - 65)
   cairo_show_text(cairo, "MEM")
   cairo_set_font_size(cairo, 14)
   cairo_move_to(cairo, x - 140, y - 38)
   cairo_show_text(cairo, "RAM " .. displayTexts[1])
-  cairo_set_source_rgba(cairo, rgba(0xc6c6c6, config.bg_alpha))
+  cairo_set_source_rgba(cairo, rgba(0xc6c6c6, variables.bg_alpha))
   cairo_move_to(cairo, x - 140, y - 23)
   cairo_show_text(cairo, "SWAP " .. displayTexts[2])
   cairo_stroke(cairo)
@@ -236,9 +208,9 @@ end
 
 
 function draw_cpu(x, y)
-  for ring_index in pairs(cpu_rings) do
+  for ring_index in pairs(variables.cpu_rings) do
     local breakpoints = {}
-    local ring = cpu_rings[ring_index]
+    local ring = variables.cpu_rings[ring_index]
     local value = evaluate(ring.command)
     if value ~= nil then
       table.insert(breakpoints, value)
@@ -257,7 +229,7 @@ function draw_cpu(x, y)
   end
   -- Write text at center of rings
   cairo_select_font_face (cairo, "Serif", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
-  cairo_set_source_rgba(cairo, rgba(0xffffff, config.bg_alpha))
+  cairo_set_source_rgba(cairo, rgba(0xffffff, variables.bg_alpha))
   cairo_set_font_size(cairo, 50)
   cairo_move_to(cairo, x - 50, y - 70)
   cairo_show_text(cairo, "CPU")
