@@ -3,7 +3,7 @@
 --   CPU rings will be automatically added [TODO]
 --   bg_alpha can be set fomr 0 to 1, determines transparency of all elements
 
-
+-- find interface
 local interface = "lo"
 local p = io.popen("ip route show default | awk '/default/ {print $5; exit}'")
 
@@ -16,9 +16,22 @@ if p then
     end
 end
 
+-- find resolution
+local p = io.popen([[xrandr --current | awk '/\*/ {print $1; exit}']])
+local resolution = p:read("*l")
+p:close()
+
+local screen_width, screen_height = resolution:match("(%d+)x(%d+)")
+
+screen_width  = tonumber(screen_width)
+screen_height = tonumber(screen_height)
+
+
 variables = {
   bg_alpha = 0.6,
   interface = interface,
+  screenW = screen_width,
+  screenH = screen_height,
 
   disk_rings = {
     { command = 'fs_used /', max = 'fs_size /' },
@@ -44,3 +57,14 @@ variables = {
   }
 }
 
+
+
+
+
+
+-- NOTES: 
+-------------------------------------------
+-- Examples of getting variables from conky:
+--   cpu_percent = tonumber(conky_parse("${cpu}")) -- Fetch CPU usage as a number
+--   conky_parse() :                 conky_parse("${cpu}") → "25.5"
+--   conky_get_info() :              cores = conky.get_info().cpus

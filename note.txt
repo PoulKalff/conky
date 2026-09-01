@@ -1,9 +1,0 @@
-
-In lua, get variables from conky:
--------------------------------------------
-cpu_percent = tonumber(conky_parse("${cpu}")) -- Fetch CPU usage as a number
-
-
-conky_parse() :			conky_parse("${cpu}") → "25.5"
-
-conky_get_info() :		cores = conky.get_info().cpus

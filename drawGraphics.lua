@@ -115,12 +115,12 @@ function conky_main()                   -- MAIN FUNCTION. Called by conky.conf, 
   draw_cpu(xCenter, yCenter)
   draw_ram(xCenter - 400, yCenter)
   draw_disk(xCenter + 400, yCenter)
---  draw_rectangle(cairo, 0, 0, 1100, 700, 0x0000ff) -- rect (blue) to show LUA area
+--  draw_rectangle(cairo, 0, 0, 1100, 700, 0x0000ff) -- rect (blue) to show LUA area, for testing
 end
 
 function draw_disk(x, y)
   local displayTexts = {}
-  local positions = {y - 37, y - 22, y - 7, y + 8} --, y + 23} 										Calculate this!!!!
+  local positions = {y - 37, y - 22, y - 7, y + 8} --, y + 23} 										Calculate this from screen width!
   for ring_index in pairs(variables.disk_rings) do
     local breakpoints = {}
     local ring = variables.disk_rings[ring_index]
