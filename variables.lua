@@ -1,7 +1,22 @@
 -- This file contains, or populates, all variables needed for conky, and adds these to the space [variables]
---   Disk rings should be set variable, according to useres wishes
---   CPU rings will be automatically added [TODO]
---   bg_alpha can be set fomr 0 to 1, determines transparency of all elements
+--   BG_ALPHA can be set from 0 to 1, determines transparency of all elements
+--   DISK_RINGS should be set manually, since conky cannot know what user wants to monitor
+
+
+
+-- find number of CPUs
+local p = io.popen("nproc")
+local cpus = tonumber(p:read("*l"))
+p:close()
+
+local _cpu_rings = {}
+
+for i = 1, cpus do
+    _cpu_rings[#_cpu_rings + 1] = {
+        command = 'cpu cpu' .. i,
+        max = 100
+    }
+end
 
 -- find interface
 local interface = "lo"
@@ -23,15 +38,12 @@ p:close()
 
 local screen_width, screen_height = resolution:match("(%d+)x(%d+)")
 
-screen_width  = tonumber(screen_width)
-screen_height = tonumber(screen_height)
-
-
 variables = {
   bg_alpha = 0.6,
   interface = interface,
-  screenW = screen_width,
-  screenH = screen_height,
+  screenW = tonumber(screen_width),
+  screenH = tonumber(screen_height),
+  cpu_rings = _cpu_rings,
 
   disk_rings = {
     { command = 'fs_used /', max = 'fs_size /' },
@@ -43,17 +55,6 @@ variables = {
   ram_rings = {
     { command = 'mem', max = 'memmax' },
     { command = 'swap', max = 'swapmax' }
-  },
-
-  cpu_rings = {
-    { command = 'cpu cpu1', max = 100 },
-    { command = 'cpu cpu2', max = 100 },
-    { command = 'cpu cpu3', max = 100 },
-    { command = 'cpu cpu4', max = 100 },
-    { command = 'cpu cpu5', max = 100 },
-    { command = 'cpu cpu6', max = 100 },
-    { command = 'cpu cpu7', max = 100 },
-    { command = 'cpu cpu8', max = 100 }
   }
 }
 

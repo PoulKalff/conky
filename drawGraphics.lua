@@ -106,64 +106,101 @@ function conky_main()                   -- MAIN FUNCTION. Called by conky.conf, 
       conky_window.display,
       conky_window.drawable,
       conky_window.visual,
-      1100,
-      700
-    )
+      conky_window.width,
+      conky_window.height    )
   )
-  xCenter = math.floor( conky_window.width / 2)
-  yCenter = math.floor( conky_window.height / 2 ) + 30  -- 30 pixels offset from top
-  draw_cpu(xCenter, yCenter)
-  draw_ram(xCenter - 400, yCenter)
-  draw_disk(xCenter + 400, yCenter)
---  draw_rectangle(cairo, 0, 0, 1100, 700, 0x0000ff) -- rect (blue) to show LUA area, for testing
+
+  local centerX = conky_window.width / 2
+  local centerY = conky_window.height / 2
+
+  draw_cpu(centerX, centerY)
+  draw_ram(centerX - 400, centerY)
+  draw_disk(centerX + 400, centerY)
+--  draw_rectangle(cairo, 0, 0, conky_window.width - 7, conky_window.height - 1, 0x0000ff) -- rect (blue) to show LUA area, for testing. no idea why it has to be -7?
 end
 
+
 function draw_disk(x, y)
-  local displayTexts = {}
-  local positions = {y - 37, y - 22, y - 7, y + 8} --, y + 23} 										Calculate this from screen width!
-  for ring_index in pairs(variables.disk_rings) do
-    local breakpoints = {}
-    local ring = variables.disk_rings[ring_index]
-    local value = toPercentage(ring.command)
-    local max = toPercentage(ring.max)
-    local str1 = string.sub(ring.command, 9)
-    local str2 = conky_parse(string.format('${%s}', ring.max))
-    table.insert(displayTexts, {str1, str2})
-    if value ~= nil then
-      table.insert(breakpoints, value)
+    local displayTexts = {}
+
+    -- Draw disk rings and collect text to display
+    for ring_index, ring in ipairs(variables.disk_rings) do
+        local breakpoints = {}
+
+        local value = toPercentage(ring.command)
+        local max = toPercentage(ring.max)
+
+        local str1 = string.sub(ring.command, 9)
+        local str2 = conky_parse(string.format('${%s}', ring.max))
+
+        table.insert(displayTexts, {str1, str2})
+
+        if value ~= nil then
+            table.insert(breakpoints, value)
+        end
+
+        draw_ring(
+            cairo,
+            x,
+            y - 53,
+            140 - ring_index * 12,
+            breakpoints,
+            max,
+            ring_index,
+            10,
+            0x0000aa
+        )
     end
-    draw_ring(
-      cairo,
-      x,
-      y - 53,
-      140 - ring_index * 12,
-      breakpoints,
-      max,
-      ring_index,
-      10,
-      0x0000aa
+
+    -- Write title at center of rings
+    cairo_select_font_face(
+        cairo,
+        "Serif",
+        CAIRO_FONT_SLANT_NORMAL,
+        CAIRO_FONT_WEIGHT_BOLD
     )
-  end
-  -- Write text at center of rings
-  cairo_select_font_face (cairo, "Serif", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
-  cairo_set_source_rgba(cairo, rgba(0xffffff, variables.bg_alpha))
-  cairo_set_font_size(cairo, 40)
-  cairo_move_to(cairo, x - 50, y - 65)
-  cairo_show_text(cairo, "DISK")
-  cairo_set_font_size(cairo, 16)
-  for _index in pairs(positions) do
-    local yPos = positions[_index]
-    if (_index % 2 == 0) then
-      cairo_set_source_rgba(cairo, rgba(0xc6c6c6, variables.bg_alpha))
-    else
-      cairo_set_source_rgba(cairo, rgba(0xffffff, variables.bg_alpha))
+
+    cairo_set_source_rgba(
+        cairo,
+        rgba(0xffffff, variables.bg_alpha)
+    )
+
+    cairo_set_font_size(cairo, 40)
+    cairo_move_to(cairo, x - 50, y - 65)
+    cairo_show_text(cairo, "DISK")
+
+    -- Write disk labels and sizes
+    cairo_set_font_size(cairo, 16)
+
+    local yOffset = -37
+    local lineSpacing = 15
+
+    for index, text in ipairs(displayTexts) do
+
+        if index % 2 == 0 then
+            cairo_set_source_rgba(
+                cairo,
+                rgba(0xc6c6c6, variables.bg_alpha)
+            )
+        else
+            cairo_set_source_rgba(
+                cairo,
+                rgba(0xffffff, variables.bg_alpha)
+            )
+        end
+
+        local yPos = y + yOffset
+
+        cairo_move_to(cairo, x - 180, yPos)
+        cairo_show_text(cairo, text[1])
+
+        cairo_move_to(cairo, x - 70, yPos)
+        cairo_show_text(cairo, text[2])
+
+        yOffset = yOffset + lineSpacing
     end
-    cairo_move_to(cairo, x - 180, yPos)
-    cairo_show_text(cairo, displayTexts[_index][1])
-    cairo_move_to(cairo, x - 70, yPos)
-    cairo_show_text(cairo, displayTexts[_index][2])
-  end
-  cairo_stroke(cairo)
+
+    cairo_stroke(cairo)
 end
 
 
@@ -230,11 +267,11 @@ function draw_cpu(x, y)
   -- Write text at center of rings
   cairo_select_font_face (cairo, "Serif", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
   cairo_set_source_rgba(cairo, rgba(0xffffff, variables.bg_alpha))
-  cairo_set_font_size(cairo, 50)
-  cairo_move_to(cairo, x - 50, y - 70)
+  cairo_set_font_size(cairo, 40)
+  cairo_move_to(cairo, x - 43, y - 50)
   cairo_show_text(cairo, "CPU")
   cairo_set_font_size(cairo, 20)
-  cairo_move_to(cairo, x - 220, y - 30)
+  cairo_move_to(cairo, x - 230, y - 30)
   cairo_show_text(cairo, "AMD Ryzen 7 5800X 8-Core")
   cairo_stroke(cairo)
  -- ${goto 540} ${execi 1000 grep model /proc/cpuinfo | cut -d : -f2 | tail -1 | sed 's/\s//' | sed "s/\bProcessor\b//g"}
