@@ -111,7 +111,7 @@ function conky_main()                   -- MAIN FUNCTION. Called by conky.conf, 
   )
 
   local centerX = conky_window.width / 2
-  local centerY = conky_window.height / 2
+  local centerY = conky_window.height / 2 + 40
 
   draw_cpu(centerX, centerY)
   draw_ram(centerX - 400, centerY)
