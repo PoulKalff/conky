@@ -1,3 +1,5 @@
+package.path = '/etc/conky/?.lua;' .. package.path
+
 require 'variables'
 require 'cairo'
 require 'cairo_xlib'
